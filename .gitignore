@@ -1,14 +1,13 @@
 # Environment package data directories and large files
-# Exclude all data folders under env_package
-agent_system/environments/env_package/*/data/
-agent_system/environments/env_package/**/data/
-
-# Webshop large files and executables
+# Exclude webshop data specifically (has large files)
 agent_system/environments/env_package/webshop/webshop/data/
 agent_system/environments/env_package/webshop/webshop/web_agent_site/envs/chromedriver
 
-# Alfworld data
-agent_system/environments/env_package/alfworld/alfworld/data/
+# Allow alfworld and sciworld data (small files)
+# But exclude other environment data folders
+agent_system/environments/env_package/*/data/
+!agent_system/environments/env_package/alfworld/alfworld/data/
+!agent_system/environments/env_package/sciworld/**/data/
 
 # Sciworld large files
 agent_system/environments/env_package/sciworld/ScienceWorld/goldpaths/goldpaths-all.zip
@@ -106,7 +105,15 @@ examples/general_running_local.sh
 agent_system/environments/env_package/webshop/webshop/data/items_ins_v2.json
 agent_system/environments/env_package/webshop/webshop/data/items_shuffle.json
 
-# Upload logs
+# Upload logs and runtime files
 upload.log
 nohup.out
 nohup_upload.out
+
+# Output directories and IDE files
+outputs/
+.vscode/
+
+# Temporary and runtime files
+*.tmp
+*.temp
