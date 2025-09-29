@@ -1,0 +1,94 @@
+# Environment package data directories and large files
+# Exclude all data folders under env_package
+agent_system/environments/env_package/*/data/
+agent_system/environments/env_package/**/data/
+
+# Webshop large files and executables
+agent_system/environments/env_package/webshop/webshop/data/
+agent_system/environments/env_package/webshop/webshop/web_agent_site/envs/chromedriver
+
+# Alfworld data
+agent_system/environments/env_package/alfworld/alfworld/data/
+
+# Sciworld large files
+agent_system/environments/env_package/sciworld/ScienceWorld/goldpaths/goldpaths-all.zip
+agent_system/environments/env_package/sciworld/ScienceWorld/scienceworld/scienceworld.jar
+
+# General large file patterns in env_package
+agent_system/environments/env_package/**/*.jar
+agent_system/environments/env_package/**/*.zip
+agent_system/environments/env_package/**/*.json
+agent_system/environments/env_package/**/*.pkl
+agent_system/environments/env_package/**/*.tar.gz
+agent_system/environments/env_package/**/*.h5
+agent_system/environments/env_package/**/*.hdf5
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
