@@ -92,3 +92,21 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Script files not to be committed
+instruct_to_run_alfworld.sh
+instruct_to_run_sciworld.sh
+instruct_to_run_webshop.sh
+draw_comparison.py
+check_upload_status.sh
+upload_remaining_files.sh
+examples/general_running_local.sh
+
+# Large webshop data files that exceed GitHub limits
+agent_system/environments/env_package/webshop/webshop/data/items_ins_v2.json
+agent_system/environments/env_package/webshop/webshop/data/items_shuffle.json
+
+# Upload logs
+upload.log
+nohup.out
+nohup_upload.out
