@@ -1,0 +1,45 @@
+# Apply to all files without committing:
+#   pre-commit run --all-files
+# Update this file:
+#   pre-commit autoupdate
+
+repos:
+  - repo: meta
+    hooks:
+      - id: check-useless-excludes
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-vcs-permalinks
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: fix-encoding-pragma
+        args: [--remove]
+      - id: forbid-submodules
+      - id: mixed-line-ending
+        args: ['--fix', 'lf']
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/shellcheck-py/shellcheck-py # Unofficial but maintained by asottile
+    rev: v0.9.0.2
+    hooks:
+      - id: shellcheck
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.2
+    hooks:
+      - id: codespell
+        args: [
+          '--ignore-regex=\\[nt]',  # Do not count escaped newlines or tabs as part of a word
+          '--ignore-regex=atLeast',
+          --check-filenames,
+          --check-hidden,
+
+        ]
