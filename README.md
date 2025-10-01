@@ -1,8 +1,11 @@
 # EPO: Entropy-regularized Policy Optimization for LLM Agents Reinforcement Learning
 
 <p align="center">
-  <a href="#">
-    <img src="https://img.shields.io/badge/arXiv-Paper-red?style=flat-square&logo=arxiv" alt="arXiv Paper"></a>
+  <a href="https://arxiv.org/abs/2509.22576">
+    <img src="https://img.shields.io/badge/arXiv-2509.22576-b31b1b?style=flat-square&logo=arxiv" alt="arXiv Paper"></a>
+  &nbsp;
+  <a href="https://api.wandb.ai/links/ruwujiang-rutgers-university/bhmi2ly5">
+    <img src="https://img.shields.io/badge/W%26B-Experiments-FFBE00?style=flat-square&logo=weightsandbiases&logoColor=white" alt="Weights & Biases"></a>
   &nbsp;
   <a href="#">
     <img src="https://img.shields.io/badge/GitHub-Project-181717?style=flat-square&logo=github" alt="GitHub Project"></a>
@@ -95,16 +98,37 @@ bash examples/general_running_server.sh --environment sciworld --rl_algorithm "p
 
 # ALFWorld PPO + EPO  
 bash examples/general_running_server.sh --environment alfworld --rl_algorithm "ppo" --seed 1 --lr 5e-6 --lr_warmup_steps_ratio 0.1 --min_lr_ratio 0.2 --warmup_style cosine --entropy_smooth True --entropy_smooth_mask_mode "token" --entropy_smooth_min_ratio 0 --entropy_smooth_max_ratio 2.0 --entropy_smooth_out_range_penalty 0.1 --model_path "/local_path/3b_model" --model_load_method "local" --enable_smooth_weights True 
+```
 
+## Experiment Tracking
+
+We use Weights & Biases to track our experiments. View our experimental results and training metrics:
+
+📊 **[EPO Experiments Dashboard](https://api.wandb.ai/links/ruwujiang-rutgers-university/bhmi2ly5)**
+
+---
+
+## Citation
+
+If you use this code or find our work helpful, please cite:
+
+```bibtex
+@article{xu2025epo,
+  title={EPO: Entropy-Regularized Policy Optimization for LLM Agents Reinforcement Learning},
+  author={Xu, Wujiang and Zhao, Wentian and Wang, Zhenting and Li, Yu-Jhe and Jin, Can and Jin, Mingyu and Mei, Kai and Wan, Kun and Metaxas, Dimitris N.},
+  journal={arXiv preprint arXiv:2509.22576},
+  year={2025}
+}
+```
+
+---
 
 ## Acknowledgments
 
-We gratefully acknowledge the contributions of the following projects and their developers:
+We gratefully acknowledge the following projects that made this research possible:
 
-- **[veRL](https://github.com/volcengine/verl)**: Volcano Engine Reinforcement Learning framework for LLMs
-- **[verl-agent](https://github.com/langfengQ/verl-agent)**: A scalable training framework for long-horizon LLM/VLM agents
-- **[ScienceWorld](https://github.com/allenai/ScienceWorld)**: Interactive text-based science environment for agent training
-- **[ALFWorld](https://alfworld.github.io/)**: Text-based embodied AI environment for household tasks
-- **[vLLM](https://github.com/vllm-project/vllm)**: High-throughput and memory-efficient inference and serving engine for LLMs
-
-These frameworks and environments provided the essential infrastructure and testbeds that made our EPO research possible.
+- **[veRL](https://github.com/volcengine/verl)** — Volcano Engine Reinforcement Learning framework for LLMs
+- **[verl-agent](https://github.com/langfengQ/verl-agent)** — Scalable training framework for long-horizon LLM/VLM agents
+- **[ScienceWorld](https://github.com/allenai/ScienceWorld)** — Interactive text-based science environment for agent training
+- **[ALFWorld](https://alfworld.github.io/)** — Text-based embodied AI environment for household tasks
+- **[vLLM](https://github.com/vllm-project/vllm)** — High-throughput and memory-efficient inference engine for LLMs
