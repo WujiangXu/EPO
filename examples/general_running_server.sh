@@ -35,6 +35,10 @@ entropy_coeff=0.001
 entropy_smooth_coeff=1.0
 entropy_smooth_out_range_penalty=0.1
 enable_smooth_weights=False
+entropy_smooth_start_epoch=0
+entropy_smooth_gamma=3.0
+entropy_smooth_max_epochs=150
+use_sliding_window=False
 # Batch size parameters
 log_prob_micro_batch_size_per_gpu=32
 ppo_micro_batch_size_per_gpu=32
@@ -170,6 +174,22 @@ while [[ $# -gt 0 ]]; do
             ;;
         --smooth_weights)
             enable_smooth_weights="$2"
+            shift 2
+            ;;
+        --entropy_smooth_start_epoch)
+            entropy_smooth_start_epoch="$2"
+            shift 2
+            ;;
+        --entropy_smooth_gamma)
+            entropy_smooth_gamma="$2"
+            shift 2
+            ;;
+        --entropy_smooth_max_epochs)
+            entropy_smooth_max_epochs="$2"
+            shift 2
+            ;;
+        --use_sliding_window)
+            use_sliding_window="$2"
             shift 2
             ;;
         --model_path)
@@ -346,6 +366,19 @@ if [ "$rl_algorithm" = "ppo" ]; then
         actor_rollout_ref.actor.max_steps=$max_steps \
         actor_rollout_ref.actor.entropy_coeff=$entropy_coeff \
         actor_rollout_ref.actor.entropy_smooth_coeff=$entropy_smooth_coeff \
+        actor_rollout_ref.actor.entropy_smooth=$entropy_smooth \
+        actor_rollout_ref.actor.entropy_smooth_mask_mode=$entropy_smooth_mask_mode \
+        actor_rollout_ref.actor.entropy_smooth_min_ratio=$entropy_smooth_min_ratio \
+        actor_rollout_ref.actor.entropy_smooth_max_ratio=$entropy_smooth_max_ratio \
+        actor_rollout_ref.actor.entropy_smooth_out_range_penalty=$entropy_smooth_out_range_penalty \
+        actor_rollout_ref.actor.enable_smooth_weights=$enable_smooth_weights \
+        actor_rollout_ref.actor.entropy_smooth_start_epoch=$entropy_smooth_start_epoch \
+        actor_rollout_ref.actor.entropy_smooth_gamma=$entropy_smooth_gamma \
+        actor_rollout_ref.actor.entropy_smooth_max_epochs=$entropy_smooth_max_epochs \
+        actor_rollout_ref.actor.entropy_distribution_output_file=$entropy_distribution_output_file \
+        trainer.window_size=$window_size \
+        trainer.use_sliding_window=$use_sliding_window \
+        env.adaptive_start_epoch=$adaptive_start_epoch \
         critic.optim.lr=$critic_lr \
         critic.model.use_remove_padding=True \
         critic.model.path=$critic_model_path \
@@ -443,5 +476,9 @@ else
         actor_rollout_ref.actor.entropy_smooth_coeff=$entropy_smooth_coeff \
         actor_rollout_ref.actor.entropy_smooth_out_range_penalty=$entropy_smooth_out_range_penalty \
         actor_rollout_ref.actor.enable_smooth_weights=$enable_smooth_weights \
+        actor_rollout_ref.actor.entropy_smooth_start_epoch=$entropy_smooth_start_epoch \
+        actor_rollout_ref.actor.entropy_smooth_gamma=$entropy_smooth_gamma \
+        actor_rollout_ref.actor.entropy_smooth_max_epochs=$entropy_smooth_max_epochs \
+        trainer.use_sliding_window=$use_sliding_window \
         actor_rollout_ref.actor.max_steps=$max_steps
 fi

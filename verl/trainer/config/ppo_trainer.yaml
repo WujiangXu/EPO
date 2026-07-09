@@ -93,6 +93,9 @@ actor_rollout_ref:
     entropy_smooth_out_range_penalty: 0.1 # penalty for samples out of entropy range
     entropy_distribution_output_file: "entropy_distribution.json" # output file for entropy distribution collection
     max_steps: 50 # same as env.max_steps
+    entropy_smooth_start_epoch: 0 # RL step at which corridor smoothing turns on (mid-run causal intervention); 0 = always on
+    entropy_smooth_gamma: 3.0 # gamma: decay rate of the 2nd-phase smoothing-weight schedule (paper's gamma); default preserves submitted runs
+    entropy_smooth_max_epochs: 150 # horizon used by the smoothing-weight schedule; set to total RL steps K (default 150 preserves submitted runs)
   ref:
     strategy: fsdp
     fsdp_config:
@@ -291,6 +294,7 @@ trainer:
   device: cuda
   rl_algorithm: grpo
   window_size: 5
+  use_sliding_window: False # False = cumulative history mean (submitted behavior); True = average only the last window_size RL steps
 
 ray_init:
   num_cpus: null # `None` means using all CPUs, which might cause hang if limited in systems like SLURM. Please set to a number allowed then.

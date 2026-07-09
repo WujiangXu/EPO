@@ -76,7 +76,7 @@ class DataParallelPPOActor(BasePPOActor):
         self.device_name = get_device_name()
 
 
-    def _calculate_epoch_based_entropy_weight(self, current_epoch: int, max_epochs: int) -> float:
+    def _calculate_epoch_based_entropy_weight(self, current_epoch: int, max_epochs: int, lambda_slow: float = 2.0, lambda_fast: float = 3.0) -> float:
         """
         Calculate epoch-based entropy weight that decreases exponentially with training progress.
         - From epoch 0 to max_epochs//2: weight decreases slowly from 1.0 to 0.8 (exponential)
@@ -106,7 +106,7 @@ class DataParallelPPOActor(BasePPOActor):
             progress = current_epoch / half_epochs  # 0.0 to 1.0
             # Use exponential decay: weight = 1.0 - 0.2 * (1 - exp(-lambda * progress))
             # This gives smooth exponential transition from 1.0 to 0.8
-            lambda_slow = 2.0  # Controls how slow the decay is in first half
+            # lambda_slow (function arg, default 2.0) controls how slow the decay is in first half
             weight = 1.0 - 0.2 * (1 - math.exp(-lambda_slow * progress))
         else:
             # Second half: quick exponential decrease from 0.8 to 0.0
@@ -115,7 +115,7 @@ class DataParallelPPOActor(BasePPOActor):
                 return 0.8
             progress = (current_epoch - half_epochs) / remaining_epochs  # 0.0 to 1.0
             # Use exponential decay: weight = 0.8 * exp(-lambda * progress)
-            lambda_fast = 3.0  # Controls how fast the decay is in second half
+            # lambda_fast (function arg, default 3.0 = paper's gamma) controls how fast the decay is in second half
             weight = 0.8 * math.exp(-lambda_fast * progress)
             
         return weight
@@ -770,10 +770,13 @@ class DataParallelPPOActor(BasePPOActor):
                     if self.config.entropy_smooth:
                         # Get max_steps from config, default to 50 if not specified
                         max_steps = self.config.get("max_step", 50)
-                        
+                        # Optional mid-run activation: only apply smoothing once trainer_epoch reaches
+                        # entropy_smooth_start_epoch (default 0 = always on). Used for causal-intervention runs.
+                        es_start_epoch = self.config.get("entropy_smooth_start_epoch", 0)
+
                         # Check if we should apply entropy smooth based on current step
                         should_apply_entropy_smooth = False
-                        if current_micro_rollout_step is not None:
+                        if current_micro_rollout_step is not None and trainer_epoch >= es_start_epoch:
                             # Check if any step in the batch is >= max_steps // 2
                             should_apply_entropy_smooth = np.any(current_micro_rollout_step >= max_steps // 2)
                             print(f"Step check: max_steps={max_steps}, threshold={max_steps // 2}")
@@ -789,9 +792,12 @@ class DataParallelPPOActor(BasePPOActor):
 
 
                             if self.config.enable_smooth_weights:
-                                # Calculate epoch-based weight for entropy smooth
-                                max_epochs = 150
-                                epoch_weight = self._calculate_epoch_based_entropy_weight(trainer_epoch, max_epochs)                            
+                                # Calculate epoch-based weight for entropy smooth.
+                                # max_epochs (schedule horizon) and gamma (2nd-phase decay rate) are
+                                # configurable; defaults (150, 3.0) preserve the submitted behavior.
+                                max_epochs = self.config.get("entropy_smooth_max_epochs", 150)
+                                gamma = self.config.get("entropy_smooth_gamma", 3.0)
+                                epoch_weight = self._calculate_epoch_based_entropy_weight(trainer_epoch, max_epochs, lambda_fast=gamma)
                                 # Apply epoch-based weight to entropy mask
                                 entropy_mask = entropy_mask * epoch_weight
                             

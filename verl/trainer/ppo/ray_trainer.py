@@ -1265,8 +1265,15 @@ class RayPPOTrainer:
                         with _timer("update_actor", timing_raw):
                             batch.meta_info["multi_turn"] = self.config.actor_rollout_ref.rollout.multi_turn.enable
                             batch.meta_info["epoch"] = epoch  # add epoch info
-                            # Handle entropy history which may have different lengths per epoch
-                            entropy_list_return = np.mean(np.array(self.entropy_history.copy()), axis=0)
+                            # Handle entropy history which may have different lengths per epoch.
+                            # Default: cumulative mean over all RL steps (submitted behavior). If
+                            # trainer.use_sliding_window is set, average only the last window_size steps.
+                            _hist = self.entropy_history
+                            if getattr(self.config.trainer, "use_sliding_window", False):
+                                _win = int(getattr(self.config.trainer, "window_size", 0) or 0)
+                                if _win > 0:
+                                    _hist = _hist[-_win:]
+                            entropy_list_return = np.mean(np.array(_hist.copy()), axis=0)
 
                             batch.meta_info["entropy_history"] = entropy_list_return.tolist()  # Pass entropy history to actor
                             actor_output = self.actor_rollout_wg.update_actor(batch)
