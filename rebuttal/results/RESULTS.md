@@ -20,15 +20,16 @@ for the plan and reviewer mapping.
 - Config policy: keep the two `dp_actor.py` quirks AS-IS (max_step→25 threshold; max_epochs=150) to
   match the submitted numbers (EXPERIMENTS.md §0 option A).
 
-## Provisioning status  (Slurm: provision job -> finalize job; logs in rebuttal/results/logs/)
+## Provisioning status  — COMPLETE (provision job 191573 + finalize job 191587)
 | Item | Status |
 |---|---|
-| micromamba env `epo` (torch/vllm/flash-attn/verl/scienceworld) | in progress (job 191573) |
-| Qwen2.5-7B-Instruct download | in progress (same job) |
-| openjdk 17 (ScienceWorld JVM via py4j) | queued in finalize job 191576 |
-| W&B key | provided, stored at $HOME/.wandb_key |
-| Data preprocess | queued in finalize job 191576 |
-| Smoke test (gate) + SciWorld JVM check | queued in finalize job 191576 (afterok:191573) |
+| micromamba env `epo` (torch2.6+cu124 / vllm0.8.5 / flash-attn / verl / scienceworld) | DONE (GPU=True) |
+| Qwen2.5-7B-Instruct download | DONE (15G, 4 shards) at $EPO_BASE/models |
+| setuptools pinned <81 (verl needs pkg_resources) | DONE |
+| openjdk 17 + JAVA_HOME (ScienceWorld JVM) | DONE — SciWorld JVM OK, 30 tasks |
+| W&B key + access | DONE — 42 runs in verl_agent_sciworld_ppo |
+| Data preprocess ($HOME/data/verl-agent/text/{train,test}.parquet) | DONE |
+| Smoke test (gate) | DONE — 4/4 PASS |
 
 ### Verified metric keys (from code, for Exp 2 analysis)
 - mean entropy = `actor/entropy_loss` (no `actor/entropy`); clip frac = `actor/pg_clipfrac`;
