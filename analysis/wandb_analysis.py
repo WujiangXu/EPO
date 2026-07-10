@@ -81,14 +81,41 @@ def get_runs(entity, project, name_filter=None):
 
 
 def run_history(run, keys):
-    """Return a DataFrame with the requested keys (+ _step) using scan_history (full resolution)."""
+    """DataFrame with the requested keys, fetched PER-KEY and outer-merged on _step.
+
+    NOTE: `run.history(keys=[a,b,...])` returns only rows where ALL keys are non-null.
+    Entropy is logged every train step while success is logged only on validation steps,
+    so a joint fetch yields an empty frame. We fetch each key independently and merge.
+    """
+    from functools import reduce
     keep = [k for k in keys if k]
-    try:
-        df = run.history(keys=keep, pandas=True, samples=100000)
-    except Exception:
-        rows = list(run.scan_history(keys=keep + ["_step"]))
-        df = pd.DataFrame(rows)
-    return df
+    parts = []
+    for k in keep:
+        try:
+            d = run.history(keys=[k], pandas=True, samples=100000)
+        except Exception:
+            continue
+        if d is None or d.empty or k not in d.columns:
+            continue
+        cols = ["_step", k] if "_step" in d.columns else [k]
+        parts.append(d[cols])
+    if not parts:
+        return pd.DataFrame()
+    if all("_step" in p.columns for p in parts):
+        return reduce(lambda a, b: pd.merge(a, b, on="_step", how="outer"), parts).sort_values("_step")
+    return pd.concat(parts, axis=1)
+
+
+def summary_scalar(run, candidates):
+    """Final scalar from run.summary for the first candidate key present."""
+    for k in candidates:
+        v = run.summary.get(k)
+        if v is not None:
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                continue
+    return np.nan
 
 
 def is_epo(name, epo_substr, baseline_substr):
@@ -103,25 +130,23 @@ def is_epo(name, epo_substr, baseline_substr):
 def analysis_oscillation(runs, outdir, epo_substr, baseline_substr):
     rows = []
     for run in runs:
-        df = run_history(run, ENTROPY_KEYS + SUCCESS_KEYS + [f"step_entropy_{i}" for i in range(60)])
-        if df is None or df.empty:
-            continue
-        ent_key = pick_key(df.columns, ENTROPY_KEYS)
-        suc_key = pick_key(df.columns, SUCCESS_KEYS, regexes=[r".*success.*"])
-        step_ent_cols = [c for c in df.columns if STEP_ENT_RE.match(c)]
+        # entropy series (fetch just the entropy candidates; per-key so no empty-join)
+        edf = run_history(run, ENTROPY_KEYS)
+        ent_key = pick_key(edf.columns, ENTROPY_KEYS) if not edf.empty else None
 
-        # Oscillation metric: std of step-to-step change in the mean-entropy training series.
         osc = np.nan
-        if ent_key and df[ent_key].notna().sum() > 3:
-            series = df[ent_key].dropna().to_numpy(dtype=float)
+        if ent_key and edf[ent_key].notna().sum() > 3:
+            series = edf[ent_key].dropna().to_numpy(dtype=float)
             osc = float(np.nanstd(np.diff(series)))
-        elif step_ent_cols:
-            # Fallback: within-trajectory across-turn spread, averaged over training.
-            osc = float(np.nanmean(df[step_ent_cols].std(axis=1)))
+        else:
+            # fallback: across-turn spread from per-turn entropy, averaged over training
+            sdf = run_history(run, [f"step_entropy_{i}" for i in range(60)])
+            step_ent_cols = [c for c in sdf.columns if STEP_ENT_RE.match(c)]
+            if step_ent_cols:
+                osc = float(np.nanmean(sdf[step_ent_cols].std(axis=1)))
 
-        succ = np.nan
-        if suc_key and df[suc_key].notna().sum() > 0:
-            succ = float(np.nanmax(df[suc_key].to_numpy(dtype=float)))
+        # final success: prefer IID (val_l0) from the run summary (last logged value)
+        succ = summary_scalar(run, SUCCESS_KEYS)
 
         if not (np.isnan(osc) or np.isnan(succ)):
             rows.append(dict(run=run.name, oscillation=osc, final_success=succ,
