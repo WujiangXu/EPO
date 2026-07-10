@@ -296,6 +296,8 @@ fi
 # Add other key parameters only if enabled
 if [ "$entropy_smooth" = "True" ]; then
     experiment_name="${experiment_name}_es${entropy_smooth_coeff}"
+    # include the corridor bounds so kappa_l ablation runs get distinct W&B names
+    experiment_name="${experiment_name}_kl${entropy_smooth_min_ratio}_kr${entropy_smooth_max_ratio}"
 fi
 
 if [ "$enable_smooth_weights" = "True" ]; then
