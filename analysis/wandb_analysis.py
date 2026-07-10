@@ -38,11 +38,20 @@ import matplotlib.pyplot as plt
 
 # ----------------------------- metric-key resolution ---------------------------------------------
 # Ordered candidates; first column that exists (exact, then regex) is used.
-ENTROPY_KEYS   = ["actor/entropy", "actor/entropy_loss", "entropy", "actor/entropys"]
+# Verified against this codebase's logging (verl/trainer/ppo/ray_trainer.py, workers/actor/dp_actor.py):
+#   mean entropy -> actor/entropy_loss  (there is no "actor/entropy" key)
+#   clip frac    -> actor/pg_clipfrac
+#   ratio var    -> NOT logged; actor/ppo_kl is the closest proxy
+#   reward       -> critic/score/mean
+#   success      -> val/success_rate, split-prefixed as val_l0 (IID) / val_l1 (OOD) or val_iid/val_ood
+#   per-turn ent -> step_entropy_<i>  (top-level)
+ENTROPY_KEYS   = ["actor/entropy_loss", "actor/entropy", "entropy", "actor/entropys"]
 CLIPFRAC_KEYS  = ["actor/pg_clipfrac", "actor/clipfrac", "actor/pg_clipfrac_lower"]
-RATIOVAR_KEYS  = ["actor/ratio_var", "actor/importance_ratio_var", "actor/ppo_ratio_var"]
+RATIOVAR_KEYS  = ["actor/ratio_var", "actor/importance_ratio_var", "actor/ppo_ratio_var", "actor/ppo_kl"]
 REWARD_KEYS    = ["critic/score/mean", "critic/rewards/mean", "episode_rewards_mean", "reward/mean"]
-SUCCESS_KEYS   = ["val/success_rate", "val_iid_success_rate", "val_l0_success_rate",
+SUCCESS_KEYS   = ["val_l0/success_rate", "val_iid/success_rate", "val/success_rate",
+                  "val_l1/success_rate", "val_ood/success_rate",
+                  "val_iid_success_rate", "val_l0_success_rate",
                   "val/test_score/success_rate", "success_rate"]
 STEP_ENT_RE    = re.compile(r"^step_entropy_\d+$")
 

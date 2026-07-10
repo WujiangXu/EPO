@@ -45,6 +45,10 @@ epo_run pip install vllm==0.8.5 || exit 60
 echo "===== [$(date)] analysis + hf + wandb deps ====="
 epo_run pip install wandb pandas numpy matplotlib scipy "huggingface_hub[hf_transfer]" || exit 70
 
+echo "===== [$(date)] openjdk 17 (ScienceWorld JVM via py4j) ====="
+micromamba install -y -n "$EPO_ENV" -c conda-forge openjdk=17 || exit 72
+epo_run java -version 2>&1 | head -1 || exit 73
+
 echo "===== [$(date)] download Qwen2.5-7B-Instruct -> $SCI_MODEL ====="
 HF_HUB_ENABLE_HF_TRANSFER=1 epo_run hf download Qwen/Qwen2.5-7B-Instruct --local-dir "$SCI_MODEL" || exit 80
 

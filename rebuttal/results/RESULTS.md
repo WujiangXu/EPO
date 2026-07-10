@@ -20,14 +20,21 @@ for the plan and reviewer mapping.
 - Config policy: keep the two `dp_actor.py` quirks AS-IS (max_step→25 threshold; max_epochs=150) to
   match the submitted numbers (EXPERIMENTS.md §0 option A).
 
-## Provisioning status  (Slurm job 191560 `epo-provision`, log: rebuttal/results/logs/provision.out)
+## Provisioning status  (Slurm: provision job -> finalize job; logs in rebuttal/results/logs/)
 | Item | Status |
 |---|---|
-| micromamba env `epo` (torch/vllm/flash-attn/verl/scienceworld) | in progress (job 191560) |
+| micromamba env `epo` (torch/vllm/flash-attn/verl/scienceworld) | in progress (job 191573) |
 | Qwen2.5-7B-Instruct download | in progress (same job) |
+| openjdk 17 (ScienceWorld JVM via py4j) | queued in finalize job 191576 |
 | W&B key | provided, stored at $HOME/.wandb_key |
-| Data preprocess | pending (after env) |
-| Smoke test (gate) | pending (after env) |
+| Data preprocess | queued in finalize job 191576 |
+| Smoke test (gate) + SciWorld JVM check | queued in finalize job 191576 (afterok:191573) |
+
+### Verified metric keys (from code, for Exp 2 analysis)
+- mean entropy = `actor/entropy_loss` (no `actor/entropy`); clip frac = `actor/pg_clipfrac`;
+  ratio variance NOT logged (proxy `actor/ppo_kl`); reward = `critic/score/mean`;
+  success = `val_l0/success_rate` (IID) / `val_l1/success_rate` (OOD); per-turn = `step_entropy_<i>`.
+### Runtime prereq (from code): ScienceWorld needs a JVM — openjdk installed into env, `JAVA_HOME` set in env_common.sh.
 
 ## Experiment 2 — log-based analyses (no training)
 | Sub | Project | Metric | Value | Fig/CSV | Status |

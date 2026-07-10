@@ -19,6 +19,9 @@ export EPO_BASE=/ai4rl/fsx/impwxu/epo
 export MAMBA_ROOT_PREFIX=$EPO_BASE/micromamba
 export EPO_ENV=epo
 export SCI_MODEL=$EPO_BASE/models/Qwen2.5-7B-Instruct
+# ScienceWorld is JVM-backed (py4j); conda openjdk lives in the env prefix.
+export JAVA_HOME=$MAMBA_ROOT_PREFIX/envs/$EPO_ENV
+export PATH=$JAVA_HOME/bin:$PATH
 export TMPDIR=$EPO_BASE/tmp
 export PIP_CACHE_DIR=$EPO_BASE/pip-cache
 export HF_HOME=$EPO_BASE/hf-cache
