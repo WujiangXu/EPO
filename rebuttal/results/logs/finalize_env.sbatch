@@ -16,6 +16,9 @@ cd "$EPO_REPO" || exit 1
 
 echo "===== [$(date)] HOST=$(hostname) finalize env ====="
 
+echo "===== [$(date)] pin setuptools<81 (verl needs pkg_resources) ====="
+epo_run pip install "setuptools<81" 2>&1 | tail -2 || exit 5
+
 echo "===== [$(date)] install openjdk 17 (ScienceWorld JVM) if missing ====="
 if ! epo_run java -version 2>/dev/null; then
   micromamba install -y -n "$EPO_ENV" -c conda-forge openjdk=17 || exit 10

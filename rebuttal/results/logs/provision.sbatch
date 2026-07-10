@@ -38,6 +38,8 @@ MAX_JOBS=32 epo_run pip install flash-attn==2.7.4.post1 --no-build-isolation || 
 
 echo "===== [$(date)] verl (pip install -e .) ====="
 epo_run pip install -e . || exit 50
+echo "===== [$(date)] pin setuptools<81 (verl imports pkg_resources) ====="
+epo_run pip install "setuptools<81" || exit 52
 
 echo "===== [$(date)] vllm 0.8.5 ====="
 epo_run pip install vllm==0.8.5 || exit 60
