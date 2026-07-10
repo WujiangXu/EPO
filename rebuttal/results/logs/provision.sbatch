@@ -18,7 +18,11 @@ cd "$EPO_REPO" || exit 1
 echo "===== [$(date)] HOST=$(hostname) ; EPO_BASE=$EPO_BASE ====="
 df -h "$EPO_BASE" | tail -1
 echo "===== [$(date)] create micromamba env ($EPO_ENV, python 3.10) ====="
-micromamba create -y -n "$EPO_ENV" -c conda-forge python=3.10 pip setuptools wheel || exit 10
+if micromamba env list 2>/dev/null | grep -qE "/envs/$EPO_ENV\b|\b$EPO_ENV\s"; then
+  echo "env $EPO_ENV already exists; skipping create"
+else
+  micromamba create -y -n "$EPO_ENV" -c conda-forge python=3.10 pip setuptools wheel || exit 10
+fi
 
 echo "===== [$(date)] scienceworld + gym + selenium ====="
 epo_run pip install scienceworld gym==0.23.1 selenium || exit 20
@@ -26,8 +30,11 @@ epo_run pip install scienceworld gym==0.23.1 selenium || exit 20
 echo "===== [$(date)] torch 2.6.0 cu124 ====="
 epo_run pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124 || exit 30
 
+echo "===== [$(date)] flash-attn build deps (psutil/ninja/packaging) ====="
+epo_run pip install psutil ninja packaging || exit 35
+
 echo "===== [$(date)] flash-attn 2.7.4.post1 ====="
-epo_run pip install flash-attn==2.7.4.post1 --no-build-isolation || exit 40
+MAX_JOBS=32 epo_run pip install flash-attn==2.7.4.post1 --no-build-isolation || exit 40
 
 echo "===== [$(date)] verl (pip install -e .) ====="
 epo_run pip install -e . || exit 50
