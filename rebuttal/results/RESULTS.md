@@ -37,12 +37,30 @@ for the plan and reviewer mapping.
   success = `val_l0/success_rate` (IID) / `val_l1/success_rate` (OOD); per-turn = `step_entropy_<i>`.
 ### Runtime prereq (from code): ScienceWorld needs a JVM — openjdk installed into env, `JAVA_HOME` set in env_common.sh.
 
-## Experiment 2 — log-based analyses (no training)
-| Sub | Project | Metric | Value | Fig/CSV | Status |
-|---|---|---|---|---|---|
-| 2a oscillation↔success | — | Pearson/Spearman r | — | — | pending |
-| 2b clip-frac / ratio var | — | EPO vs baseline | — | — | pending |
-| 2c entropy-vs-corridor | — | floor-bind steps (κ_l=0) | — | — | pending |
+## Experiment 2 — log-based analyses (no training)  — DONE (figs/CSVs in rebuttal/results/exp2_*)
+**2a oscillation↔success (Pearson r / Spearman ρ / n):**
+| Project | Pearson r (p) | Spearman ρ | n |
+|---|---|---|---|
+| verl_agent_sciworld_ppo  | **−0.509 (p=1.1e-3)** | −0.559 | 38 |
+| verl_agent_sciworld_grpo | +0.156 (p=0.36) | 0.120 | 37 |
+| verl_agent_alfworld_ppo  | +0.009 (p=0.97) | 0.087 | 16 |
+| verl_agent_alfworld_grpo | +0.015 (p=0.91) | 0.317 | 65 |
+
+**2c entropy-vs-corridor floor-bind at κ_l=0:** floor binds **0 steps in ALL projects**
+(sciworld_ppo 0/9, sciworld_grpo 0/123, alfworld_ppo 0/150, alfworld_grpo 0/150).
+
+**2b variance:** importance-ratio variance NOT logged in the released runs; clip-fraction
+(`actor/pg_clipfrac`) + `actor/ppo_kl` proxy plotted per project.
+
+**Interpretation (for the rebuttal):**
+- *Theme A (κ_l=0 harmless):* strongly supported — the κ_l=0 lower bound **never binds** in any
+  released run, i.e. measured entropy always stays above the floor. Exp 1 (active κ_l) + Exp 5
+  (collapse regime) will close this.
+- *Theme C (oscillation↔success):* clear **negative** correlation in **ScienceWorld PPO**
+  (r=−0.51, p≈1e-3) — exactly the sparsest, highest-variance setting where EPO helps most (Theme F).
+  Weak/absent in GRPO and ALFWorld (consistent with milder cascade failure there); report honestly.
+- Grouping-by-name is imperfect (runs use both `ours_*` and `ec0.001` tags), so 2b baseline-vs-EPO
+  coloring is approximate; the 2a correlation uses ALL runs and is unaffected.
 
 ## Experiment 1 — κ_l ablation (ScienceWorld, full matrix 12 runs)
 | Algo | κ_l | seed | W&B run name | IID Succ.* | OOD Succ.* | Succ.̄ | Status |
