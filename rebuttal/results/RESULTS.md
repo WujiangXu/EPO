@@ -65,11 +65,11 @@ for the plan and reviewer mapping.
 ## Experiment 1 — κ_l ablation (ScienceWorld, full matrix 12 runs)
 | Algo | κ_l | seed | W&B run name | IID Succ.* | OOD Succ.* | Succ.̄ | Status |
 |---|---|---|---|---|---|---|---|
-| PPO+EPO | 0 | 0 | — | — | — | — | pending |
+| PPO+EPO | 0 | 0 | ppo_s0_..._ec0.001_es1.0_kl0_kr2.0_sw (job 191672) | — | — | — | RUNNING (pilot) |
 | PPO+EPO | 0 | 1 | — | — | — | — | pending |
 | PPO+EPO | 0.5 | 0 | — | — | — | — | pending |
 | PPO+EPO | 0.5 | 1 | — | — | — | — | pending |
-| PPO+EPO | 0.8 | 0 | — | — | — | — | pending |
+| PPO+EPO | 0.8 | 0 | ppo_s0_..._ec0.001_es1.0_kl0.8_kr2.0_sw (job 191673) | — | — | — | RUNNING (pilot) |
 | PPO+EPO | 0.8 | 1 | — | — | — | — | pending |
 | GRPO+EPO | 0 | 0 | — | — | — | — | pending |
 | GRPO+EPO | 0 | 1 | — | — | — | — | pending |
