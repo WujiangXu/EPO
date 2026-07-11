@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=epo-exp1
 #SBATCH --account=usr-sr
-#SBATCH --qos=h200_rl_shared
+#SBATCH --qos=h200_usr-sr_high
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=96

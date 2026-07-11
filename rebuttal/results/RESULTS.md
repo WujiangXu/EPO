@@ -62,7 +62,7 @@ for the plan and reviewer mapping.
 - Grouping-by-name is imperfect (runs use both `ours_*` and `ec0.001` tags), so 2b baseline-vs-EPO
   coloring is approximate; the 2a correlation uses ALL runs and is unaffected.
 
-## Experiment 1 — κ_l ablation (ScienceWorld, full matrix 12 runs) — ALL (RE)SUBMITTED
+## Experiment 1 — κ_l ablation (ScienceWorld, full matrix 12 runs) — ALL (RE)SUBMITTED on h200_usr-sr_high (priority 100)
 W&B project: verl_agent_sciworld_{ppo,grpo}; run name `<algo>_s<seed>_..._ec0.001_es1.0_kl<κ_l>_kr2.0_sw`.
 **Config note:** switched to `max_prompt_length=6144` + `max_model_len=32768` (matches the paper's
 *completing* runs). The original EXPERIMENTS.md config (2048/4096) overflows the accumulated
@@ -70,18 +70,18 @@ multi-turn prompt and crashes mid-training — the paper's own 2048/4096 runs ar
 Also fixed: launcher skips data-preprocess if parquet exists (concurrent-run race).
 | Algo | κ_l | seed | Slurm job | IID Succ.* | OOD Succ.* | Status |
 |---|---|---|---|---|---|---|
-| PPO+EPO | 0 | 0 | 192022 | — | — | queued |
-| PPO+EPO | 0 | 1 | 192023 | — | — | queued |
-| PPO+EPO | 0.5 | 0 | 192024 | — | — | queued |
-| PPO+EPO | 0.5 | 1 | 192025 | — | — | queued |
-| PPO+EPO | 0.8 | 0 | 192026 | — | — | queued |
-| PPO+EPO | 0.8 | 1 | 192027 | — | — | queued |
-| GRPO+EPO | 0 | 0 | 192028 | — | — | queued |
-| GRPO+EPO | 0 | 1 | 192029 | — | — | queued |
-| GRPO+EPO | 0.5 | 0 | 192030 | — | — | queued |
-| GRPO+EPO | 0.5 | 1 | 192031 | — | — | queued |
-| GRPO+EPO | 0.8 | 0 | 192032 | — | — | queued |
-| GRPO+EPO | 0.8 | 1 | 192033 | — | — | queued |
+| PPO+EPO | 0 | 0 | 192078 | — | — | queued |
+| PPO+EPO | 0 | 1 | 192079 | — | — | queued |
+| PPO+EPO | 0.5 | 0 | 192080 | — | — | queued |
+| PPO+EPO | 0.5 | 1 | 192081 | — | — | queued |
+| PPO+EPO | 0.8 | 0 | 192082 | — | — | queued |
+| PPO+EPO | 0.8 | 1 | 192083 | — | — | queued |
+| GRPO+EPO | 0 | 0 | 192084 | — | — | queued |
+| GRPO+EPO | 0 | 1 | 192085 | — | — | queued |
+| GRPO+EPO | 0.5 | 0 | 192086 | — | — | queued |
+| GRPO+EPO | 0.5 | 1 | 192087 | — | — | queued |
+| GRPO+EPO | 0.8 | 0 | 192088 | — | — | queued |
+| GRPO+EPO | 0.8 | 1 | 192089 | — | — | queued |
 
 ## Experiment 3 — causal intervention (planned)
 | Config | W&B run name | Status |
