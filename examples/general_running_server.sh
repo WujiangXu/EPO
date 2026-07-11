@@ -242,7 +242,9 @@ case $environment in
         env_name="sciworld/SciWorldEnv"
         project_name_suffix="sciworld"
         max_steps=30
-        max_prompt_length=2048
+        # 6144 matches the paper's completing runs; 2048 (old config) overflows the
+        # accumulated multi-turn prompt and crashes mid-training.
+        max_prompt_length=6144
         # Set conservative GPU memory utilization for SciWorld to prevent OOM
         gpu_memory_util_override=0.4
         ;;
@@ -353,7 +355,7 @@ if [ "$rl_algorithm" = "ppo" ]; then
         actor_rollout_ref.actor.use_kl_loss=True \
         actor_rollout_ref.actor.kl_loss_coef=0.01 \
         actor_rollout_ref.actor.kl_loss_type=low_var_kl \
-        actor_rollout_ref.rollout.max_model_len=4096 \
+        actor_rollout_ref.rollout.max_model_len=32768 \
         actor_rollout_ref.model.enable_gradient_checkpointing=True \
         actor_rollout_ref.actor.fsdp_config.param_offload=False \
         actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
@@ -445,7 +447,7 @@ else
         actor_rollout_ref.rollout.name=$ENGINE \
         actor_rollout_ref.rollout.dtype=half \
         actor_rollout_ref.rollout.gpu_memory_utilization=$gpu_memory_utilization \
-        actor_rollout_ref.rollout.max_model_len=4096 \
+        actor_rollout_ref.rollout.max_model_len=32768 \
         actor_rollout_ref.rollout.enable_chunked_prefill=False \
         actor_rollout_ref.rollout.enforce_eager=False \
         actor_rollout_ref.rollout.free_cache_engine=False \
