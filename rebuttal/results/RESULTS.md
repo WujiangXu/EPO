@@ -70,18 +70,18 @@ multi-turn prompt and crashes mid-training — the paper's own 2048/4096 runs ar
 Also fixed: launcher skips data-preprocess if parquet exists (concurrent-run race).
 | Algo | κ_l | seed | Slurm job | IID Succ.* | OOD Succ.* | Status |
 |---|---|---|---|---|---|---|
-| PPO+EPO | 0 | 0 | 192078 | — | — | queued |
-| PPO+EPO | 0 | 1 | 192079 | — | — | queued |
-| PPO+EPO | 0.5 | 0 | 192080 | — | — | queued |
-| PPO+EPO | 0.5 | 1 | 192081 | — | — | queued |
-| PPO+EPO | 0.8 | 0 | 192082 | — | — | queued |
-| PPO+EPO | 0.8 | 1 | 192083 | — | — | queued |
-| GRPO+EPO | 0 | 0 | 192084 | — | — | queued |
-| GRPO+EPO | 0 | 1 | 192085 | — | — | queued |
-| GRPO+EPO | 0.5 | 0 | 192086 | — | — | queued |
-| GRPO+EPO | 0.5 | 1 | 192087 | — | — | queued |
-| GRPO+EPO | 0.8 | 0 | 192088 | — | — | queued |
-| GRPO+EPO | 0.8 | 1 | 192089 | — | — | queued |
+| PPO+EPO | 0 | 0 | 192113 | — | — | RESUBMITTED (data-dir+chunked-prefill fix) |
+| PPO+EPO | 0 | 1 | 192114 | — | — | queued |
+| PPO+EPO | 0.5 | 0 | 192115 | — | — | queued |
+| PPO+EPO | 0.5 | 1 | 192116 | — | — | queued |
+| PPO+EPO | 0.8 | 0 | 192117 | — | — | queued |
+| PPO+EPO | 0.8 | 1 | 192118 | — | — | queued |
+| GRPO+EPO | 0 | 0 | 192119 | — | — | queued |
+| GRPO+EPO | 0 | 1 | 192120 | — | — | queued |
+| GRPO+EPO | 0.5 | 0 | 192121 | — | — | queued |
+| GRPO+EPO | 0.5 | 1 | 192122 | — | — | queued |
+| GRPO+EPO | 0.8 | 0 | 192123 | — | — | queued |
+| GRPO+EPO | 0.8 | 1 | 192124 | — | — | queued |
 
 ## Experiment 3 — causal intervention (planned)
 | Config | W&B run name | Status |

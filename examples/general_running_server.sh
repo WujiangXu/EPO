@@ -308,13 +308,17 @@ fi
 echo "Generated experiment name: $experiment_name"
 
 # Data preprocessing
-# Skip if the parquet already exists: the placeholder data is identical across runs, and
-# concurrent regeneration to the shared $HOME/data path races -> "Train dataloader is empty!".
-if [ -f "$HOME/data/verl-agent/text/train.parquet" ] && [ -f "$HOME/data/verl-agent/text/test.parquet" ]; then
-    echo "Data preprocessing: reusing existing $HOME/data/verl-agent/text/{train,test}.parquet"
+# Per-run isolated data dir (set EPO_DATA_DIR per job) avoids the shared-path race AND lets
+# PPO (batch = train_data_size*group_size) and GRPO (batch = train_data_size) each regenerate
+# their correctly-sized parquet. Falls back to the legacy shared path if EPO_DATA_DIR unset.
+data_root="${EPO_DATA_DIR:-$HOME/data/verl-agent}"
+data_dir="$data_root/text"
+if [ -f "$data_dir/train.parquet" ] && [ -f "$data_dir/test.parquet" ]; then
+    echo "Data preprocessing: reusing existing $data_dir/{train,test}.parquet"
 else
-    echo "Starting data preprocessing..."
+    echo "Starting data preprocessing into $data_root ..."
     python3 -m examples.data_preprocess.prepare \
+        --local_dir "$data_root" \
         --mode 'text' \
         --train_data_size $train_data_size \
         --val_data_size $val_data_size
@@ -331,8 +335,8 @@ fi
 if [ "$rl_algorithm" = "ppo" ]; then
     python3 -m verl.trainer.main_ppo \
         algorithm.adv_estimator=$adv_estimator \
-        data.train_files=$HOME/data/verl-agent/text/train.parquet \
-        data.val_files=$HOME/data/verl-agent/text/test.parquet \
+        data.train_files=$data_dir/train.parquet \
+        data.val_files=$data_dir/test.parquet \
         data.train_batch_size=$train_data_size \
         data.val_batch_size=$val_data_size \
         data.max_prompt_length=$max_prompt_length \
@@ -364,7 +368,7 @@ if [ "$rl_algorithm" = "ppo" ]; then
         actor_rollout_ref.rollout.name=$ENGINE \
         actor_rollout_ref.rollout.dtype=half \
         actor_rollout_ref.rollout.gpu_memory_utilization=$gpu_memory_utilization \
-        actor_rollout_ref.rollout.enable_chunked_prefill=False \
+        actor_rollout_ref.rollout.enable_chunked_prefill=True \
         actor_rollout_ref.rollout.enforce_eager=False \
         actor_rollout_ref.rollout.free_cache_engine=False \
         actor_rollout_ref.rollout.val_kwargs.temperature=0.4 \
@@ -415,8 +419,8 @@ else
     # GRPO
     python3 -m verl.trainer.main_ppo \
         algorithm.adv_estimator=$adv_estimator \
-        data.train_files=$HOME/data/verl-agent/text/train.parquet \
-        data.val_files=$HOME/data/verl-agent/text/test.parquet \
+        data.train_files=$data_dir/train.parquet \
+        data.val_files=$data_dir/test.parquet \
         data.train_batch_size=$train_data_size \
         data.val_batch_size=$val_data_size \
         data.max_prompt_length=$max_prompt_length \
@@ -448,7 +452,7 @@ else
         actor_rollout_ref.rollout.dtype=half \
         actor_rollout_ref.rollout.gpu_memory_utilization=$gpu_memory_utilization \
         actor_rollout_ref.rollout.max_model_len=32768 \
-        actor_rollout_ref.rollout.enable_chunked_prefill=False \
+        actor_rollout_ref.rollout.enable_chunked_prefill=True \
         actor_rollout_ref.rollout.enforce_eager=False \
         actor_rollout_ref.rollout.free_cache_engine=False \
         actor_rollout_ref.rollout.val_kwargs.temperature=0.4 \

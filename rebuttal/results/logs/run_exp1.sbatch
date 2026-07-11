@@ -17,6 +17,10 @@ set -o pipefail
 source /storage/home/impwxu/code/EPO/rebuttal/results/logs/env_common.sh
 cd "$EPO_REPO" || exit 1
 
+# per-run isolated data dir (correct size for PPO vs GRPO; no concurrent-write race)
+export EPO_DATA_DIR="$EPO_BASE/data/$SLURM_JOB_ID"
+mkdir -p "$EPO_DATA_DIR"
+
 # node-local scratch for ray/vllm temp (compute /tmp is a 1G tmpfs). Ray honors TMPDIR.
 for cand in "/a100/epo_$SLURM_JOB_ID" "/dev/shm/epo_$SLURM_JOB_ID"; do
   if mkdir -p "$cand" 2>/dev/null; then export TMPDIR="$cand"; break; fi
