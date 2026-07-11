@@ -306,11 +306,17 @@ fi
 echo "Generated experiment name: $experiment_name"
 
 # Data preprocessing
-echo "Starting data preprocessing..."
-python3 -m examples.data_preprocess.prepare \
-    --mode 'text' \
-    --train_data_size $train_data_size \
-    --val_data_size $val_data_size
+# Skip if the parquet already exists: the placeholder data is identical across runs, and
+# concurrent regeneration to the shared $HOME/data path races -> "Train dataloader is empty!".
+if [ -f "$HOME/data/verl-agent/text/train.parquet" ] && [ -f "$HOME/data/verl-agent/text/test.parquet" ]; then
+    echo "Data preprocessing: reusing existing $HOME/data/verl-agent/text/{train,test}.parquet"
+else
+    echo "Starting data preprocessing..."
+    python3 -m examples.data_preprocess.prepare \
+        --mode 'text' \
+        --train_data_size $train_data_size \
+        --val_data_size $val_data_size
+fi
 
 # Set GPU memory utilization based on environment
 if [ "$environment" = "sciworld" ]; then
