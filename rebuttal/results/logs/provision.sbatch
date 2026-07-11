@@ -44,6 +44,11 @@ epo_run pip install "setuptools<81" || exit 52
 echo "===== [$(date)] vllm 0.8.5 ====="
 epo_run pip install vllm==0.8.5 || exit 60
 
+echo "===== [$(date)] upgrade OpenTelemetry for ray>=2.56 (must run AFTER vllm) ====="
+# ray 2.56 needs opentelemetry-sdk>=1.30 (has OtelComponentTypeValues); vllm pins <1.27 but only
+# imports OTel when tracing is enabled (we don't), so the newer stack is runtime-safe.
+epo_run pip install -U "opentelemetry-sdk>=1.30" "opentelemetry-api>=1.30" "opentelemetry-exporter-otlp>=1.30" || exit 62
+
 echo "===== [$(date)] analysis + hf + wandb deps ====="
 epo_run pip install wandb pandas numpy matplotlib scipy "huggingface_hub[hf_transfer]" || exit 70
 
