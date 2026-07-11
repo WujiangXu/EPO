@@ -24,8 +24,8 @@ else
   micromamba create -y -n "$EPO_ENV" -c conda-forge python=3.10 pip setuptools wheel || exit 10
 fi
 
-echo "===== [$(date)] scienceworld + gym + selenium ====="
-epo_run pip install scienceworld gym==0.23.1 selenium || exit 20
+echo "===== [$(date)] scienceworld + gym + gymnasium + selenium ====="
+epo_run pip install scienceworld gym==0.23.1 gymnasium==0.29.1 selenium || exit 20
 
 echo "===== [$(date)] torch 2.6.0 cu124 ====="
 epo_run pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124 || exit 30
