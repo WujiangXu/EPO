@@ -62,21 +62,22 @@ for the plan and reviewer mapping.
 - Grouping-by-name is imperfect (runs use both `ours_*` and `ec0.001` tags), so 2b baseline-vs-EPO
   coloring is approximate; the 2a correlation uses ALL runs and is unaffected.
 
-## Experiment 1 — κ_l ablation (ScienceWorld, full matrix 12 runs)
-| Algo | κ_l | seed | W&B run name | IID Succ.* | OOD Succ.* | Succ.̄ | Status |
-|---|---|---|---|---|---|---|---|
-| PPO+EPO | 0 | 0 | ppo_s0_..._ec0.001_es1.0_kl0_kr2.0_sw (job 191672) | — | — | — | RUNNING (pilot) |
-| PPO+EPO | 0 | 1 | — | — | — | — | pending |
-| PPO+EPO | 0.5 | 0 | — | — | — | — | pending |
-| PPO+EPO | 0.5 | 1 | — | — | — | — | pending |
-| PPO+EPO | 0.8 | 0 | ppo_s0_..._ec0.001_es1.0_kl0.8_kr2.0_sw (job 191673) | — | — | — | RUNNING (pilot) |
-| PPO+EPO | 0.8 | 1 | — | — | — | — | pending |
-| GRPO+EPO | 0 | 0 | — | — | — | — | pending |
-| GRPO+EPO | 0 | 1 | — | — | — | — | pending |
-| GRPO+EPO | 0.5 | 0 | — | — | — | — | pending |
-| GRPO+EPO | 0.5 | 1 | — | — | — | — | pending |
-| GRPO+EPO | 0.8 | 0 | — | — | — | — | pending |
-| GRPO+EPO | 0.8 | 1 | — | — | — | — | pending |
+## Experiment 1 — κ_l ablation (ScienceWorld, full matrix 12 runs) — ALL SUBMITTED
+W&B project: verl_agent_sciworld_{ppo,grpo}; run name pattern `<algo>_s<seed>_..._ec0.001_es1.0_kl<κ_l>_kr2.0_sw`.
+| Algo | κ_l | seed | Slurm job | IID Succ.* | OOD Succ.* | Status |
+|---|---|---|---|---|---|---|
+| PPO+EPO | 0 | 0 | 191710 | — | — | RUNNING (pilot) |
+| PPO+EPO | 0 | 1 | 191718 | — | — | RUNNING |
+| PPO+EPO | 0.5 | 0 | 191719 | — | — | RUNNING |
+| PPO+EPO | 0.5 | 1 | 191720 | — | — | RUNNING |
+| PPO+EPO | 0.8 | 0 | 191711 | — | — | RUNNING (pilot) |
+| PPO+EPO | 0.8 | 1 | 191721 | — | — | RUNNING |
+| GRPO+EPO | 0 | 0 | 191722 | — | — | PENDING |
+| GRPO+EPO | 0 | 1 | 191723 | — | — | PENDING |
+| GRPO+EPO | 0.5 | 0 | 191724 | — | — | PENDING |
+| GRPO+EPO | 0.5 | 1 | 191725 | — | — | PENDING |
+| GRPO+EPO | 0.8 | 0 | 191726 | — | — | PENDING |
+| GRPO+EPO | 0.8 | 1 | 191727 | — | — | PENDING |
 
 ## Experiment 3 — causal intervention (planned)
 | Config | W&B run name | Status |
