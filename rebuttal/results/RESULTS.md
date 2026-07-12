@@ -62,26 +62,43 @@ for the plan and reviewer mapping.
 - Grouping-by-name is imperfect (runs use both `ours_*` and `ec0.001` tags), so 2b baseline-vs-EPO
   coloring is approximate; the 2a correlation uses ALL runs and is unaffected.
 
-## Experiment 1 — κ_l ablation (ScienceWorld, full matrix 12 runs) — ALL (RE)SUBMITTED on h200_usr-sr_high (priority 100)
+## Experiment 1 — κ_l ablation (ScienceWorld, 12 runs) — COMPLETE (jobs 192134-192145, h200_usr-sr_high)
 W&B project: verl_agent_sciworld_{ppo,grpo}; run name `<algo>_s<seed>_..._ec0.001_es1.0_kl<κ_l>_kr2.0_sw`.
-**Config note:** switched to `max_prompt_length=6144` + `max_model_len=32768` (matches the paper's
-*completing* runs). The original EXPERIMENTS.md config (2048/4096) overflows the accumulated
-multi-turn prompt and crashes mid-training — the paper's own 2048/4096 runs are mostly `crashed`.
-Also fixed: launcher skips data-preprocess if parquet exists (concurrent-run race).
-| Algo | κ_l | seed | Slurm job | IID Succ.* | OOD Succ.* | Status |
+**Config:** `max_prompt_length=6144`, `max_model_len=16384`, `max_num_batched_tokens=16384`,
+`enable_chunked_prefill=True`, per-run isolated data dir. (Original EXPERIMENTS.md 2048/4096 config
+overflows the multi-turn prompt & crashes — the paper's own 2048/4096 runs are mostly `crashed`;
+we adopted the paper's *completing* 6144-prompt config.) Metric protocol: converged = mean of last
+3 validations; peak = max over training. Val sets are 16 samples (0.0625 granularity) → noisy.
+
+**Per-run (converged IID / OOD | peak IID / OOD):**
+| Algo | κ_l | seed | IID conv | OOD conv | IID peak | OOD peak |
 |---|---|---|---|---|---|---|
-| PPO+EPO | 0 | 0 | 192134 | — | — | RESUBMITTED (data-dir+chunked-prefill fix) |
-| PPO+EPO | 0 | 1 | 192135 | — | — | queued |
-| PPO+EPO | 0.5 | 0 | 192136 | — | — | queued |
-| PPO+EPO | 0.5 | 1 | 192137 | — | — | queued |
-| PPO+EPO | 0.8 | 0 | 192138 | — | — | queued |
-| PPO+EPO | 0.8 | 1 | 192139 | — | — | queued |
-| GRPO+EPO | 0 | 0 | 192140 | — | — | queued |
-| GRPO+EPO | 0 | 1 | 192141 | — | — | queued |
-| GRPO+EPO | 0.5 | 0 | 192142 | — | — | queued |
-| GRPO+EPO | 0.5 | 1 | 192143 | — | — | queued |
-| GRPO+EPO | 0.8 | 0 | 192144 | — | — | queued |
-| GRPO+EPO | 0.8 | 1 | 192145 | — | — | queued |
+| PPO+EPO | 0 | 0 | 1.000 | 0.917 | 1.000 | 1.000 |
+| PPO+EPO | 0 | 1 | 1.000 | 0.979 | 1.000 | 1.000 |
+| PPO+EPO | 0.5 | 0 | 1.000 | 0.979 | 1.000 | 1.000 |
+| PPO+EPO | 0.5 | 1 | 0.271 | 0.229 | 0.438 | 0.438 |
+| PPO+EPO | 0.8 | 0 | 0.229 | 0.229 | 0.562 | 0.375 |
+| PPO+EPO | 0.8 | 1 | 1.000 | 0.958 | 1.000 | 1.000 |
+| GRPO+EPO | 0 | 0 | 0.438 | 0.417 | 0.688 | 0.750 |
+| GRPO+EPO | 0 | 1 | 0.604 | 0.625 | 1.000 | 1.000 |
+| GRPO+EPO | 0.5 | 0 | 0.292 | 0.229 | 0.375 | 0.312 |
+| GRPO+EPO | 0.5 | 1 | 0.208 | 0.146 | 0.312 | 0.312 |
+| GRPO+EPO | 0.8 | 0 | 0.896 | 0.875 | 1.000 | 1.000 |
+| GRPO+EPO | 0.8 | 1 | 0.125 | 0.208 | 0.312 | 0.562 |
+
+**Seed-averaged per κ_l (converged IID / OOD | peak IID / OOD):**
+| Algo | κ_l=0 | κ_l=0.5 | κ_l=0.8 |
+|---|---|---|---|
+| PPO+EPO | **1.000 / 0.948** \| 1.00/1.00 | 0.635 / 0.604 \| 0.72/0.72 | 0.615 / 0.594 \| 0.78/0.69 |
+| GRPO+EPO | 0.521 / 0.521 \| 0.84/0.88 | 0.250 / 0.188 \| 0.34/0.31 | 0.510 / 0.542 \| 0.66/0.78 |
+
+**κ_l comparison / Theme A conclusion:** activating the corridor floor (κ_l>0) does **not** improve
+over κ_l=0. For PPO, κ_l=0 is clearly best (converged 1.00/0.95 vs ~0.62 for κ_l>0). For GRPO,
+κ_l=0 ≈ κ_l=0.8 (~0.52) and κ_l=0.5 is worst. This **supports the rebuttal's Theme A claim** that
+the κ_l=0 lower bound was *empirically harmless* here (consistent with Exp 2c: the floor never binds).
+**Caveat:** strong seed variance — several cells are bimodal (one seed →~1.0, the other →~0.2), so
+differences among κ_l are within 2-seed noise on the 16-sample val set; the safe claim is "κ_l>0 gives
+no consistent benefit," not a precise ranking. The active upper cap (κ_r=2.0) + entropy term carry EPO.
 
 ## Experiment 3 — causal intervention (planned)
 | Config | W&B run name | Status |
