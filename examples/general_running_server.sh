@@ -300,6 +300,11 @@ if [ "$entropy_smooth" = "True" ]; then
     experiment_name="${experiment_name}_es${entropy_smooth_coeff}"
     # include the corridor bounds so kappa_l ablation runs get distinct W&B names
     experiment_name="${experiment_name}_kl${entropy_smooth_min_ratio}_kr${entropy_smooth_max_ratio}"
+    # penalty + mid-run start epoch so Exp3/Exp4 sweeps get distinct W&B names
+    experiment_name="${experiment_name}_p${entropy_smooth_out_range_penalty}"
+    if [ "$entropy_smooth_start_epoch" != "0" ]; then
+        experiment_name="${experiment_name}_se${entropy_smooth_start_epoch}"
+    fi
 fi
 
 if [ "$enable_smooth_weights" = "True" ]; then

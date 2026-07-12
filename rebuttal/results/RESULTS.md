@@ -100,17 +100,29 @@ the κ_l=0 lower bound was *empirically harmless* here (consistent with Exp 2c: 
 differences among κ_l are within 2-seed noise on the 16-sample val set; the safe claim is "κ_l>0 gives
 no consistent benefit," not a precise ranking. The active upper cap (κ_r=2.0) + entropy term carry EPO.
 
-## Experiment 3 — causal intervention (planned)
-| Config | W&B run name | Status |
-|---|---|---|
-| PPO+EPO start_epoch=40 | — | planned |
-| PPO+EPO never-on (control) | — | planned |
-| plain PPO lr 3e-6/5e-6/1e-5 | — | planned |
+## Experiments 3 + 4 — RUNNING in ONE 13-node allocation (Slurm job 194742, qos h200_usr-sr_high)
+Single sbatch (`run_exp34_batch.sbatch`) requests 13 nodes and fans out one 8×H200 training step per
+node (saves priority vs 13 separate jobs). Logs: rebuttal/results/exp3/*.out, exp4/*.out.
 
-## Experiment 4 — sensitivity (planned)
-| Knob | Values | Status |
+### Exp 3 — causal intervention + LR confounder control (ScienceWorld PPO, seed 0)
+| Run | Config | Status |
 |---|---|---|
-| entropy_coeff | 0.0005/0.001/0.002 | planned |
-| out_range_penalty | 0.05/0.1/0.2 | planned |
-| max_ratio (κ_r) | 1.5/2.0/2.5 | planned |
-| entropy_smooth_coeff | 0.5/1.0/2.0 | planned |
+| exp3_toggle_se40 | PPO+EPO, EPO turns ON at epoch 40 (`entropy_smooth_start_epoch=40`) | RUNNING |
+| exp3_never_se9999 | PPO+EPO, EPO never on (start_epoch=9999) — control | RUNNING |
+| exp3_plainppo_lr3e6 | plain PPO (no EPO), lr 3e-6 | RUNNING |
+| exp3_plainppo_lr5e6 | plain PPO, lr 5e-6 | RUNNING |
+| exp3_plainppo_lr1e5 | plain PPO, lr 1e-5 | RUNNING |
+
+### Exp 4 — one-knob sensitivity (ScienceWorld GRPO+EPO, seed 0; center = Exp1 grpo_kl0_s0)
+| Run | Knob value | Status |
+|---|---|---|
+| exp4_ec0p0005 | entropy_coeff=0.0005 | RUNNING |
+| exp4_ec0p002 | entropy_coeff=0.002 | RUNNING |
+| exp4_pen0p1 | out_range_penalty=0.1 | RUNNING |
+| exp4_pen0p2 | out_range_penalty=0.2 | RUNNING |
+| exp4_kr1p5 | κ_r=1.5 | RUNNING |
+| exp4_kr2p5 | κ_r=2.5 | RUNNING |
+| exp4_esc0p5 | entropy_smooth_coeff=0.5 | RUNNING |
+| exp4_esc2p0 | entropy_smooth_coeff=2.0 | RUNNING |
+
+Defaults (ec0.001, pen0.05, κ_r2.0, es_coeff1.0) reuse Exp1 grpo_kl0_s0 as the center point.
