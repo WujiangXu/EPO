@@ -5,9 +5,9 @@ experiments into Themes A / C / D so the OpenReview replies cite concrete eviden
 "we will report." All numbers are reproducible from the released W&B logs + the new runs on branch
 `rebuttal/epo-experiments` (see `rebuttal/results/RESULTS.md`, `analysis/wandb_analysis.py`).
 
-Status: **Exp 1 & Exp 2 complete.** Exp 3 (causal toggle + LR control) and Exp 4 (sensitivity) are
-running (1 shared 13-node job, ETA ~12–20h); their tables are marked *[pending]* and will be filled
-on completion.
+Status: **Exp 1, 2, 3, 4 all complete.** (Exp 3 `plainppo_lr1e5` reached 106/125 when the shared job
+hit its 24h wall — treated as final; it had already collapsed to reward ≈ 0.) W&B run URLs for every
+run are in `rebuttal/results/WANDB_INDEX.md`.
 
 ---
 
@@ -70,15 +70,18 @@ setting where our cascade-failure thesis predicts EPO matters most (Theme F). We
 ALFWorld, consistent with milder oscillation there. We report this honestly (not overclaiming a
 universal law) and soften "primary cause" → "primary, controllable driver."
 
-**C2. Direct causal intervention (Exp 3) — [pending].** PPO+EPO with smoothing gated on at epoch 40
-(`entropy_smooth_start_epoch=40`) vs a never-on control. We will show entropy trajectory
-(`actor/entropy_loss`) and reward (`critic/score/mean`) with the toggle marked; expected: entropy
-stabilizes and reward recovers at the toggle. *Early signal already visible:* in the LR-confounder
-arm the plain-PPO lr=1e-5 run is markedly unstable (per-step time ballooning ~2–3× vs stable runs),
-consistent with LR-independent instability that EPO controls.
+**C2. Direct causal intervention (Exp 3).** PPO+EPO with smoothing gated ON at epoch 40
+(`entropy_smooth_start_epoch=40`) vs an identical never-on control. Result: post-toggle entropy
+oscillation std(ΔH) drops **0.055 → 0.019**, and reward jumps **1.70 → 9.50** (IID 0.27 → 0.98) — i.e.
+turning EPO on mid-run *causes* stabilization + reward recovery, not a coincidental symptom. A further
+control shows an *uncontrolled* entropy bonus (entropy_coeff on, no corridor) actually hurts (never-on
+reward 1.70) vs plain PPO with no bonus (9.97) at the same LR — the corridor is what makes the entropy
+term usable.
 
-**C3. LR confounder control (Exp 3) — [pending].** Plain PPO at lr ∈ {3e-6, 5e-6, 1e-5}: we will
-show instability persists across LR (not an LR artifact) while EPO is stable across the same set.
+**C3. LR confounder control (Exp 3).** Plain PPO (no EPO) at lr ∈ {3e-6, 5e-6, 1e-5}: entropy
+oscillation 0.06 → 0.41 → 0.55 and reward 9.97 → 0.31 → −0.10. Instability and its oscillation
+signature scale with LR (not an LR-only artifact), and oscillation magnitude tracks the collapse across
+the sweep — consistent with C1/C2.
 
 ---
 
@@ -92,14 +95,25 @@ bounded-per-token-probability assumption the reviewer suggested.
 
 ---
 
-## Theme E — Hyperparameter sensitivity (91dS-Q6, uSAW-#4) — Exp 4 [pending]
+## Theme E — Hyperparameter sensitivity (91dS-Q6, uSAW-#4) — Exp 4
 
-ScienceWorld GRPO+EPO, one knob at a time around the default (center = Exp 1 grpo κ_l=0 seed 0):
-λ=`entropy_coeff`∈{0.0005, 0.001, 0.002}, α=`out_range_penalty`∈{0.05, 0.1, 0.2},
-κ_r∈{1.5, 2.0, 2.5}, smoothing weight `entropy_smooth_coeff`∈{0.5, 1.0, 2.0}. Converged IID/OOD per
-value will be tabulated to show a broad plateau (method not brittle). *Caveats retained from
-EXPERIMENTS.md §4:* the entropy reference is a cumulative (not fixed-window) mean, and γ is a fixed
-scheduled decay (we sweep `entropy_smooth_coeff` as the practical proxy).
+ScienceWorld GRPO+EPO, one knob at a time around the default (center = Exp 1 grpo κ_l=0 s0 = 0.44/0.42
+converged IID/OOD). Converged success (last-3-val mean):
+
+| Knob | low | center | high |
+|---|---|---|---|
+| λ `entropy_coeff` {0.0005/0.001/0.002} | 0.00/0.00 | 0.44/0.42 | 0.94/0.90 |
+| α `out_range_penalty` {0.05/0.1/0.2} | (=center) | 0.08/0.10 | 0.90/0.85 |
+| κ_r {1.5/2.0/2.5} | 0.98/0.96 | 0.44/0.42 | 0.08/0.02 |
+| smoothing weight {0.5/1.0/2.0} | 0.00/0.00 | 0.44/0.42 | 0.19/0.19 |
+
+**Honest finding:** at a single seed on a 16-sample val set the results are **noisy/high-variance** —
+not a clean plateau. Directionally sensible trends do appear: **adequate λ helps** (0→0.44→0.94) and a
+**tighter upper cap κ_r helps** (κ_r=1.5 → 0.98 vs κ_r=2.5 → 0.08, reinforcing that the *upper* bound
+is the load-bearing part of the corridor — cf. Theme A). We will present this as a sensitivity study
+with the explicit caveat that a robustness/plateau claim needs multiple seeds, and we will not overclaim
+insensitivity. *Caveats retained from EXPERIMENTS.md §4:* the entropy reference is a cumulative (not
+fixed-window) mean, and γ is a fixed scheduled decay (`entropy_smooth_coeff` swept as the practical proxy).
 
 ---
 

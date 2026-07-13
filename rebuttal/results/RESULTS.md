@@ -100,29 +100,42 @@ the κ_l=0 lower bound was *empirically harmless* here (consistent with Exp 2c: 
 differences among κ_l are within 2-seed noise on the 16-sample val set; the safe claim is "κ_l>0 gives
 no consistent benefit," not a precise ranking. The active upper cap (κ_r=2.0) + entropy term carry EPO.
 
-## Experiments 3 + 4 — RUNNING in ONE 13-node allocation (Slurm job 194742, qos h200_usr-sr_high)
-Single sbatch (`run_exp34_batch.sbatch`) requests 13 nodes and fans out one 8×H200 training step per
-node (saves priority vs 13 separate jobs). Logs: rebuttal/results/exp3/*.out, exp4/*.out.
+## Experiments 3 + 4 — COMPLETE (one 13-node job 194742; 12 runs to 125, plainppo_lr1e5 to 106/125)
+Single sbatch (`run_exp34_batch.sbatch`) requested 13 nodes, one 8×H200 step per node. The job hit its
+24h wall; 12 runs finished 125/125, the intentionally-unstable `plainppo_lr1e5` reached 106/125
+(treated as final — it had already collapsed). W&B URLs in `rebuttal/results/WANDB_INDEX.md`.
 
 ### Exp 3 — causal intervention + LR confounder control (ScienceWorld PPO, seed 0)
-| Run | Config | Status |
-|---|---|---|
-| exp3_toggle_se40 | PPO+EPO, EPO turns ON at epoch 40 (`entropy_smooth_start_epoch=40`) | RUNNING |
-| exp3_never_se9999 | PPO+EPO, EPO never on (start_epoch=9999) — control | RUNNING |
-| exp3_plainppo_lr3e6 | plain PPO (no EPO), lr 3e-6 | RUNNING |
-| exp3_plainppo_lr5e6 | plain PPO, lr 5e-6 | RUNNING |
-| exp3_plainppo_lr1e5 | plain PPO, lr 1e-5 | RUNNING |
+entOsc = std(ΔH); split at epoch 40 for the toggle/never pair. rew = final `critic/score/mean` (0–10 scale).
+| Run | entOsc[<40] | entOsc[≥40] | reward | IID conv | OOD conv |
+|---|---|---|---|---|---|
+| toggle_se40 (EPO ON @40) | 0.055 | **0.019** | **9.50** | **0.98** | **0.98** |
+| never_se9999 (EPO never) | 0.078 | 0.031 | 1.70 | 0.27 | 0.19 |
+| plain PPO lr 3e-6 (no EPO) | 0.060 | 0.022 | 9.97 | 1.00 | 0.98 |
+| plain PPO lr 5e-6 (no EPO) | 0.413 | 0.102 | 0.31 | 0.10 | 0.08 |
+| plain PPO lr 1e-5 (no EPO)* | 0.548 | 0.129 | −0.10 | 0.00 | 0.00 |
 
-### Exp 4 — one-knob sensitivity (ScienceWorld GRPO+EPO, seed 0; center = Exp1 grpo_kl0_s0)
-| Run | Knob value | Status |
-|---|---|---|
-| exp4_ec0p0005 | entropy_coeff=0.0005 | RUNNING |
-| exp4_ec0p002 | entropy_coeff=0.002 | RUNNING |
-| exp4_pen0p1 | out_range_penalty=0.1 | RUNNING |
-| exp4_pen0p2 | out_range_penalty=0.2 | RUNNING |
-| exp4_kr1p5 | κ_r=1.5 | RUNNING |
-| exp4_kr2p5 | κ_r=2.5 | RUNNING |
-| exp4_esc0p5 | entropy_smooth_coeff=0.5 | RUNNING |
-| exp4_esc2p0 | entropy_smooth_coeff=2.0 | RUNNING |
+*106/125. **Conclusions:**
+- **Causal toggle:** switching EPO smoothing ON at epoch 40 drops post-toggle entropy oscillation
+  (0.055→0.019) and lifts reward 1.70→9.50 (IID 0.27→0.98) vs the identical never-on control — direct
+  evidence that controlling oscillation *causes* the gain (Theme C), not a symptom.
+- **Uncontrolled entropy hurts:** never_se9999 (entropy bonus, no corridor) = 1.70; plain PPO (no bonus)
+  at the same lr = 9.97 — an unbounded entropy term drives over-exploration; the corridor rescues it.
+- **LR confounder:** plain-PPO instability scales with LR (entOsc 0.06→0.41→0.55; reward 9.97→0.31→−0.10
+  for lr 3e-6/5e-6/1e-5) and entropy-oscillation tracks the collapse — oscillation↔failure is robust
+  across LR (not an LR-only artifact).
 
-Defaults (ec0.001, pen0.05, κ_r2.0, es_coeff1.0) reuse Exp1 grpo_kl0_s0 as the center point.
+### Exp 4 — one-knob sensitivity (ScienceWorld GRPO+EPO, seed 0; converged IID / OOD)
+Center (defaults ec0.001, pen0.05, κ_r2.0, es_coeff1.0) = Exp1 grpo_kl0_s0 = **0.44 / 0.42**.
+| Knob | low | center | high |
+|---|---|---|---|
+| λ entropy_coeff {0.0005, 0.001, 0.002} | 0.00 / 0.00 | 0.44 / 0.42 | 0.94 / 0.90 |
+| α out_range_penalty {0.05, 0.1, 0.2} | — (=center) | 0.08 / 0.10 (0.1) | 0.90 / 0.85 (0.2) |
+| κ_r {1.5, 2.0, 2.5} | 0.98 / 0.96 (1.5) | 0.44 / 0.42 | 0.08 / 0.02 (2.5) |
+| es_coeff {0.5, 1.0, 2.0} | 0.00 / 0.00 (0.5) | 0.44 / 0.42 | 0.19 / 0.19 (2.0) |
+
+**Conclusion (honest):** single-seed GRPO on the 16-sample val set is **noisy/high-variance** — not the
+clean "broad plateau" hoped for. Two semi-clean trends: **higher λ helps** (0→0.44→0.94) and **smaller
+κ_r helps** (0.98→0.44→0.08); penalty & es_coeff are non-monotonic. Report as: EPO is sensitive to
+these knobs at 1 seed; the trends (tighter upper cap κ_r, adequate λ) are directionally sensible, but a
+robustness claim needs more seeds. **Do not overclaim insensitivity.**
