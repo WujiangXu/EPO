@@ -1,2 +1,6 @@
+# raw training/job console logs & transient slurm artifacts (data lives in W&B + RESULTS.md)
 *.log
+*.out
+*.out.attempt*
+*.jobid
 logs/*.log

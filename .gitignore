@@ -117,3 +117,4 @@ outputs/
 # Temporary and runtime files
 *.tmp
 *.temp
+.claude/
